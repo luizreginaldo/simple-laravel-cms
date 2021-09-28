@@ -16,7 +16,7 @@ class Frontpage extends Component
      * @param  mixed $urlslug
      * @return void
      */
-    public function mount($urlslug)
+    public function mount($urlslug = null)
     {
         $this->retrieveContent($urlslug);
     }
@@ -29,7 +29,20 @@ class Frontpage extends Component
      */
     public function retrieveContent($urlslug)
     {
-        $data = Page::whereSlug($urlslug)->first();
+        // Get home page if slug is empty
+        if(empty($urlslug)) {
+            $data = Page::whereIsDefaultHome(true)->first();
+        } else {
+            // Get the page according to the slug value
+            $data = Page::whereSlug($urlslug)->first();
+
+            // If we can't retrieve anything, let's get the default 404 not found page
+            if (!$data) {
+                $data = Page::whereIsDefaultNotFound(true)->first();
+            }
+
+        }
+
         $this->title = $data->title;
         $this->content = $data->content;
     }
